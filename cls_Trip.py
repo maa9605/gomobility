@@ -1,6 +1,6 @@
 from db_util import get_dataset, insert_record, update_record
-import geocoder, time, json, requests
-from datetime import date, timedelta
+import time,requests,json,geocoder
+from datetime import date, timedelta, datetime
 
 def get_dist(start_lat, start_lon, end_lat, end_lon):
 	payload = {
@@ -17,7 +17,22 @@ def get_dist(start_lat, start_lon, end_lat, end_lon):
 	
 	Distance = dt['resourceSets'][0]['resources'][0]['results'][0]['travelDistance']
 
+	#Duration = dt['resourceSets'][0]['resources'][0]['results'][0]['travelDuration']
+	
 	return Distance
+
+def calc_duration(start, end):
+
+	t1 = datetime.strptime(start, "%H:%M:%S")
+
+	t2 = datetime.strptime(end, "%H:%M:%S")
+	
+	
+	delta = t2 - t1
+	
+	dur = delta.total_seconds() / 60
+	
+	return dur
 
 def get_current_location():
 	g = geocoder.ip('me')
@@ -57,7 +72,8 @@ class Trip:
 	
 	def begin_trip(self):
 		current_lat, current_lon = get_current_location()
-		self.start_time = time.strftime("%H:%M:%S", time.localtime())
+		self.start_time = "23:39:42"
+		#self.start_time = time.strftime("%H:%M:%S", time.localtime())
 		self.start_lat = current_lat
 		self.start_lon = current_lon
 		self.status = 2
@@ -67,14 +83,14 @@ class Trip:
 		self.update_trip("Status", self.status)
 		
 	def end_trip(self, lat=None, lon=None):
-		#current_lat, current_lon = get_current_location()
+		current_lat, current_lon = get_current_location()
 		self.end_time = time.strftime("%H:%M:%S", time.localtime())
 		self.end_lat = lat
 		self.end_lon = lon
 		self.status = 3
-		self.actual_duration = 44.5
-		self.actual_distance = 41.332
-		#self.actual_distance = get_dist(self.start_lat, self.start_lon, self.end_lat, self.end_lon)
+		print(self.start_time, self.end_time)
+		self.actual_duration = calc_duration(self.start_time, self.end_time)
+		self.actual_distance = get_dist(self.start_lat, self.start_lon, self.end_lat, self.end_lon)
 		self.toll_cost = 0
 		self.total_cost = (self.actual_duration * .40) + (self.actual_distance * .77) 
 	

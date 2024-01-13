@@ -4,8 +4,8 @@ from cls_Trip import Trip
 #val = input("Pickup Location: ")
 #val2 = input("Where are you going: ")
 val="1514 Mohave Drive Colton CA"
-val2 = "4775 Irwindale Ave Irwindale CA"
-#val2="435 E Hospitality Lane San Bernardino CA"
+#val2 = "4775 Irwindale Ave Irwindale CA"
+val2="435 E Hospitality Lane San Bernardino CA"
 #val2="762 E 29th Street San Bernardino CA"
 #val2="333 E Columbia Avenue Pomona CA"
 #val2="333 E Columbia Avenue Pomona CA"
@@ -43,5 +43,5 @@ p2.begin_trip()
 print("Your trip has begun")
 
 #Driver Ends Ride Calculates totals and then processes CC
-p2.end_trip()
+p2.end_trip(34.099174, -117.934244)
 
