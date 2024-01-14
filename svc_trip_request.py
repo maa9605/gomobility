@@ -42,6 +42,14 @@ while(response != "Yes"):
 p2.begin_trip()
 print("Your trip has begun")
 
+#Driver Confirms Pickup of Rider
+response = "No"
+while(response != "Yes"):
+	response = input("Have you arrived at your destination?")
+
 #Driver Ends Ride Calculates totals and then processes CC
 p2.end_trip(34.099174, -117.934244)
+
+
+
 

@@ -1,5 +1,6 @@
 from db_util import get_dataset, insert_record, update_record
 import time,requests,json,geocoder
+from decimal import Decimal
 from datetime import date, timedelta, datetime
 
 def get_dist(start_lat, start_lon, end_lat, end_lon):
@@ -50,6 +51,20 @@ def get_trip_request(bid_id):
 		trip_request_id = row[0]
 	
 	return trip_request_id
+	
+def get_per_min_mile(bid_id):
+
+	sql = "SELECT Per_Mile, Per_Min from tbl_Bids Where Bid_Id=%s;"
+	
+	vals = (bid_id)
+	
+	myresult = get_dataset(sql, vals)
+	
+	for row in myresult:
+		mile = row[0]
+		min = row[1]
+	
+	return mile, min
 
 
 class Trip:		
@@ -62,6 +77,7 @@ class Trip:
 		vals = (trip_request_id, bid_id, date.today())
 		
 		self.trip_id = insert_record(sql,vals)
+		self.bid_id = bid_id
 		
 	def update_trip(self, name, value):
 	
@@ -72,8 +88,8 @@ class Trip:
 	
 	def begin_trip(self):
 		current_lat, current_lon = get_current_location()
-		self.start_time = "23:39:42"
-		#self.start_time = time.strftime("%H:%M:%S", time.localtime())
+		#self.start_time = "23:39:42"
+		self.start_time = time.strftime("%H:%M:%S", time.localtime())
 		self.start_lat = current_lat
 		self.start_lon = current_lon
 		self.status = 2
@@ -92,7 +108,9 @@ class Trip:
 		self.actual_duration = calc_duration(self.start_time, self.end_time)
 		self.actual_distance = get_dist(self.start_lat, self.start_lon, self.end_lat, self.end_lon)
 		self.toll_cost = 0
-		self.total_cost = (self.actual_duration * .40) + (self.actual_distance * .77) 
+		_mile, _min = get_per_min_mile(self.bid_id)
+		print(Decimal(_min))
+		self.total_cost = (Decimal(self.actual_duration) * Decimal(_min)) + (Decimal(self.actual_distance) * Decimal(_mile)) 
 	
 		self.update_trip("End_Time", self.end_time)
 		self.update_trip("End_Lat", self.end_lat)
@@ -103,7 +121,6 @@ class Trip:
 		self.update_trip("Total_Cost", self.total_cost)
 		self.update_trip("Status", self.status)
 		
-		print("Trip Complete")
 	
 		
 		

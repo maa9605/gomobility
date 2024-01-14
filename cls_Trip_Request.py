@@ -1,5 +1,5 @@
 import time,requests,json,mysql.connector, geocoder
-from db_util import get_dataset, get_geo_dataset, insert_record
+from db_util import get_dataset, get_geo_dataset, insert_record, update_record
 from decimal import Decimal
 from cls_Bid import Bid
 from datetime import date
@@ -72,9 +72,6 @@ class Trip_Request:
 				self.duration = row[8]
 				self.status = row[9]
 				
-			print(self.timestamp)
-			
-				
 	def add_trip_request(self):
 
 		sql = "INSERT INTO tbl_Trip_Request(Rider_ID, Start_Lat, Start_Lon, End_Lat, End_Lon, Est_Distance, Est_Duration, Status) Values(%s, %s, %s, %s, %s, %s, %s, %s)"
@@ -86,18 +83,28 @@ class Trip_Request:
 		
 		radius = 50
 		
-		sql = "SELECT * FROM Active_Drivers WHERE (ST_Distance_Sphere(point(Active_Drivers.Location_Lon, Active_Drivers.Location_Lat), point(" + str(self.start_lon) + ", " + str(self.start_lat) + ")) *.000621371192) <= " + str(radius) + ";" 
+		sql = "SELECT * FROM Active_Drivers WHERE (ST_Distance_Sphere(point(Active_Drivers.Location_Lon, Active_Drivers.Location_Lat), point(" + str(self.start_lon) + ", " + str(self.start_lat) + ")) * .000621371192) <= " + str(radius) + ";" 
 		
 		myresult = get_geo_dataset(sql)
 
 		for row in myresult:
 			driver_distance, driver_eta = get_dist_dur(str(row[1]), str(row[2]),self.start_lat, self.start_lon)
-			p1 = Bid(self.trip_request_id, str(row[0]), driver_eta, (get_distance_cost(self.distance, row[3]) + get_duration_cost(self.duration, row[4])), 1)
+			p1 = Bid()
+			p1.request_id = self.trip_request_id
+			p1.driver_id = str(row[0])
+			p1.per_mile = row[3]
+			p1.per_min = row[4]
+			p1.est_pickup = driver_eta
+			p1.est_cost = get_distance_cost(self.distance, p1.per_mile) + get_duration_cost(self.duration, p1.per_min)
+			p1.status = 1
 			p1.add_bid()
 	
 	def accept_bid(self, bid_id):
-	
-		pass
+		
+		sql = "UPDATE tbl_Bids SET Status = %s WHERE Bid_ID=%s"
+		vals = (2, bid_id)
+		
+		update_record(sql, vals)
 	
 	def get_bids(self):
 	
@@ -107,7 +114,14 @@ class Trip_Request:
 		myresult = get_dataset(sql, vals)
 		
 		for row in myresult:
-			print(str(row[0]), str(row[2]), str(row[4]), str(row[5]))
+			print(str(row[0]), str(row[2]), str(row[6]), str(row[7]))
+	
+	def update_trip_request(self, name, value):
+	
+		sql = "UPDATE tbl_Trip_Request SET " + name + " = %s WHERE Request_ID=%s"
+		vals = (value, self.trip_id)
+		
+		update_record(sql, vals)
 		
 		
 		
