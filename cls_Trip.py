@@ -1,33 +1,14 @@
 from db_util import get_dataset, insert_record, update_record
+from geo_util import get_distance_duration, get_distance, get_lonlat
 import time,requests,json,geocoder
 from decimal import Decimal
 from datetime import date, timedelta, datetime
-
-def get_dist(start_lat, start_lon, end_lat, end_lon):
-	payload = {
-    	"origins": [{"latitude": start_lat, "longitude": start_lon}],
-    	"destinations": [{"latitude": end_lat, "longitude": end_lon}],
-    	"travelMode": "driving",
-	}
-
-	paramtr = {"key": "Alnl7OjP5Vk1MKEB_Oaof_Fe_OD7KJHkydKd4vMeaB9l9ZyUlEDLpdG-DK58eyvM"}
-
-	r = requests.post('https://dev.virtualearth.net/REST/v1/Routes/DistanceMatrix', data = json.dumps(payload), params = paramtr)
-
-	dt = json.loads(r.content)
-	
-	Distance = dt['resourceSets'][0]['resources'][0]['results'][0]['travelDistance']
-
-	#Duration = dt['resourceSets'][0]['resources'][0]['results'][0]['travelDuration']
-	
-	return Distance
 
 def calc_duration(start, end):
 
 	t1 = datetime.strptime(start, "%H:%M:%S")
 
 	t2 = datetime.strptime(end, "%H:%M:%S")
-	
 	
 	delta = t2 - t1
 	
@@ -106,10 +87,10 @@ class Trip:
 		self.status = 3
 		print(self.start_time, self.end_time)
 		self.actual_duration = calc_duration(self.start_time, self.end_time)
-		self.actual_distance = get_dist(self.start_lat, self.start_lon, self.end_lat, self.end_lon)
+		self.actual_distance = get_distance(self.start_lat, self.start_lon, self.end_lat, self.end_lon)
 		self.toll_cost = 0
 		_mile, _min = get_per_min_mile(self.bid_id)
-		print(Decimal(_min))
+		#print(Decimal(_min))
 		self.total_cost = (Decimal(self.actual_duration) * Decimal(_min)) + (Decimal(self.actual_distance) * Decimal(_mile)) 
 	
 		self.update_trip("End_Time", self.end_time)
