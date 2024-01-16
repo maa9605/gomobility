@@ -47,7 +47,6 @@ def get_per_min_mile(bid_id):
 	
 	return mile, min
 
-
 class Trip:		
 				
 	def add_trip(self, bid_id):

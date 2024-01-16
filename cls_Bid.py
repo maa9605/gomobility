@@ -1,5 +1,6 @@
 from db_util import get_dataset, insert_record
 from cls_Trip import Trip
+
 class Bid:
 
 	def get_bid(bid_id):
