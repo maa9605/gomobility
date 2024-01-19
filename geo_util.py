@@ -5,6 +5,18 @@ from geopy.geocoders import Nominatim
 
 def get_lonlat(address):
 
+	rUrl = "https://api.tomtom.com/search/2/geocode/" + address + ".json?key=eAhxGZstyLnRbCZ3PwEYPtuyvQs1JyHv"
+	r = requests.get(rUrl)
+	jStr = json.dumps(r.json())
+	jsonStr = json.loads(jStr)
+	
+	lat = jsonStr['results'][0]['position']['lat']
+	lon = jsonStr['results'][0]['position']['lon']
+	
+	return lat, lon
+	
+def get_lonlat_old(address):
+
 	loc = Nominatim(user_agent="Geopy Library")
 	getLoc = loc.geocode(address)
 

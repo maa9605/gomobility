@@ -3,16 +3,17 @@ from cls_Trip import Trip
 
 class Bid:
 
-	def get_bid(bid_id):
+	def set_bid(self, bid_id):
 	
 		sql = "SELECT * FROM tbl_Bids WHERE Bid_ID=%s;"
 			
-		vals = (str(trip_request_id))
+		vals = (str(bid_id))
 		
 		myresult = get_dataset(sql,vals)
 			
 		for row in myresult:
 			
+			self.bid_id = row[0]
 			self.driver_id = row[2]
 			self.request_id = row[3]
 			self.per_mile = row[4]
@@ -20,6 +21,7 @@ class Bid:
 			self.est_cost = row[6]
 			self.est_pickup_time = row[7]
 			self.status = row[8]
+			
 		
 	def add_bid(self):
 	
